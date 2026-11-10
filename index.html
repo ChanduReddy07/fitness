@@ -81,7 +81,7 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
   <div class="card"><h2>Points so far</h2><div id="c1"></div></div>
   <div class="card"><h2>Daily steps</h2><div id="c2"></div></div>
   <div class="card"><h2>Sleep hours</h2><div id="c3"></div></div>
-  <div class="card"><h2>Calendar</h2><div class="mu" style="margin-bottom:6px">Darker green = more points (max 3) &nbsp;<span style="color:#e9a23b">■</span> logged, 0 points</div><div class="grid" id="cal"></div></div>
+  <div class="card"><h2>Calendar</h2><div class="mu" style="margin-bottom:6px">Darker green = more points (max 3) &nbsp;<span style="color:#e9a23b">■</span> logged, 0 points</div><div id="cal"></div></div>
 </section>
 </div>
 <nav><button id="n0" class="on">Home</button><button id="n1">Log</button><button id="n2">Progress</button></nav>
@@ -161,7 +161,14 @@ function prog(){
   $("c1").innerHTML=chart([{c,v:cum(pw)}]);
   $("c2").innerHTML=chart([{c,v:daily(pw,"steps")}],{bars:true});
   $("c3").innerHTML=chart([{c,v:days.map(d=>{const e=E[key(pw,d)];return e&&+e.sleep>0?+e.sleep:null})}],{max:12});
-  $("cal").innerHTML=days.map(d=>{const e=E[key(pw,d)];const q=ptOf(e);return `<div class="c ${e&&!q?"r":""} ${d===real?"t":""}" style="${q?"background:rgba(31,157,85,"+(.3+.7*q/3)+");color:#fff":""}" title="${d}: ${q} pts">${+d.slice(8)}</div>`}).join("");
+  $("cal").innerHTML=[[10,"November 2026"],[11,"December 2026"]].map(([m,t])=>{
+    const off=(new Date(2026,m,1).getDay()+6)%7,len=new Date(2026,m+1,0).getDate();
+    let h=`<div style="font:700 18px var(--hd);margin:12px 0 6px">${t}</div><div class="grid">`+["M","T","W","T","F","S","S"].map(x=>`<div class="mu" style="text-align:center;font-size:11px">${x}</div>`).join("")+"<div></div>".repeat(off);
+    for(let k=1;k<=len;k++){const d=fmt(new Date(2026,m,k));
+      if(d<START||d>END){h+=`<div class="c" style="background:none;opacity:.3">${k}</div>`;continue}
+      const e=E[key(pw,d)],q=ptOf(e);
+      h+=`<div class="c ${e&&!q?"r":""} ${d===real?"t":""}" style="${q?"background:rgba(31,157,85,"+(.3+.7*q/3)+");color:#fff":""}" title="${d}: ${q} pts">${k}</div>`}
+    return h+"</div>"}).join("");
 }
 function setYN(id,v){document.querySelectorAll("#"+id+" button").forEach(b=>b.classList.toggle("on",v!==null&&b.dataset.v===String(v)))}
 function form(){
