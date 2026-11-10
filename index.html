@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14171c">
+<title>Squad Fitness Challenge</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+:root{--bg:#f1f0ea;--card:#fff;--tx:#14171c;--mu:#6a6f7a;--bd:#e0ded5;--ink:#14171c;--ok:#1f9d55;--no:#d64545;--hd:'Barlow Condensed','Arial Narrow',system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root{--bg:#101216;--card:#1a1d24;--tx:#f1f0ea;--mu:#9a9fab;--bd:#2a2e38;--ink:#f1f0ea;color-scheme:dark}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:env(safe-area-inset-top) 0 calc(78px + env(safe-area-inset-bottom))}
+.w{max-width:720px;margin:0 auto;padding:14px}
+header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px}
+h1{font:700 30px/1 var(--hd);margin:0;letter-spacing:.3px}
+.day{font:600 15px var(--hd);color:var(--mu);text-align:right}
+h2{font:700 20px/1 var(--hd);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.mu{color:var(--mu);font-size:13px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;border:0;background:none;color:var(--mu);font:600 16px var(--hd);padding:12px 4px;cursor:pointer}
+nav button.on{color:var(--tx);box-shadow:inset 0 3px 0 var(--ink)}
+.pg{display:none}.pg.on{display:block}
+.today{display:flex;justify-content:space-between;gap:6px}
+.pp{flex:1;text-align:center;font-size:12px}
+.av{width:42px;height:42px;border-radius:50%;margin:0 auto 4px;display:grid;place-items:center;color:#fff;font:700 18px var(--hd);opacity:.28;position:relative}
+.pp.in .av{opacity:1}.pp.in .av::after{content:"✓";position:absolute;right:-4px;bottom:-4px;background:var(--ok);width:17px;height:17px;border-radius:50%;font:700 11px/17px system-ui}
+.lb{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--bd)}.lb:first-of-type{border:0}
+.rk{font:700 20px var(--hd);width:22px;color:var(--mu)}
+.bar{flex:1;height:10px;background:var(--bd);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;border-radius:6px}
+.pt{font:700 24px var(--hd);width:44px;text-align:right}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:12px}.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+svg{display:block;width:100%;height:auto}svg text{fill:var(--mu);font-size:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--bd);background:var(--card);color:var(--tx);padding:10px 16px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+label{display:block;font-size:13px;font-weight:600;margin:16px 0 6px}
+input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);font:inherit;font-size:16px}
+.yn{display:flex;gap:8px}.yn button{flex:1;padding:14px;border:1.5px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx);font:inherit;font-weight:700;cursor:pointer}
+.yn button.y.on{background:var(--ok);border-color:var(--ok);color:#fff}.yn button.n.on{background:var(--no);border-color:var(--no);color:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save{width:100%;margin-top:18px;padding:15px;border:0;border-radius:12px;background:var(--ink);color:var(--bg);font:700 20px var(--hd);cursor:pointer}
+.del{width:100%;margin-top:8px;padding:11px;border:0;background:none;color:var(--no);font:inherit;font-weight:600;cursor:pointer}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.tile b{display:block;font:700 28px/1.1 var(--hd)}.tile span{font-size:11px;color:var(--mu)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.c{aspect-ratio:1;border-radius:6px;background:var(--bd);font-size:10px;display:grid;place-items:center;color:var(--mu)}
+.c.g{background:var(--ok);color:#fff}.c.r{background:#e9a23b;color:#fff}.c.t{outline:2px solid var(--ink)}
+.fd{padding:9px 0;border-top:1px solid var(--bd);font-size:14px}.fd:first-of-type{border:0}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}
+.warn{background:#fff3cd;color:#664d03;padding:12px;border-radius:12px;margin-bottom:12px;font-size:14px}
+</style></head><body><div class="w">
+<header><h1>Squad Fitness Challenge</h1><div class="day" id="day"></div></header>
+<div id="warn"></div>
+
+<section class="pg on" id="p0">
+  <div class="card"><h2>Logged today</h2><div class="today" id="today"></div></div>
+  <div class="card"><h2>Leaderboard</h2><div class="mu" style="margin:-4px 0 6px">1 point for every workout day</div><div id="lb"></div></div>
+  <div class="card"><h2>Everyone together</h2><div id="gch"></div><div class="leg" id="gleg"></div></div>
+  <div class="card"><h2>Latest remarks</h2><div id="feed"></div></div>
+</section>
+
+<section class="pg" id="p1">
+  <div class="card">
+    <h2>Log your day</h2>
+    <label>Who are you?</label><div class="chips" id="who"></div>
+    <label>Date</label><input type="date" id="date">
+    <label>Did you work out?</label><div class="yn" id="wo"><button class="y" data-v="1">Yes</button><button class="n" data-v="0">No</button></div>
+    <label>Home food only?</label><div class="yn" id="fo"><button class="y" data-v="1">Yes</button><button class="n" data-v="0">No</button></div>
+    <div class="two"><div><label>Steps</label><input type="number" id="steps" inputmode="numeric" min="0" placeholder="8000"></div>
+    <div><label>Sleep (hours)</label><input type="number" id="sleep" inputmode="decimal" min="0" max="24" step="0.5" placeholder="8"></div></div>
+    <label>Remarks</label><textarea id="rem" rows="2" placeholder="How was your day?"></textarea>
+    <button class="save" id="save">Save</button><button class="del hide" id="del" style="display:none">Delete this day's entry</button>
+  </div>
+</section>
+
+<section class="pg" id="p2">
+  <div class="chips" id="pwho" style="margin-bottom:12px"></div>
+  <div class="tiles" id="tiles"></div>
+  <div class="card"><h2>Points so far</h2><div id="c1"></div></div>
+  <div class="card"><h2>Daily steps</h2><div id="c2"></div></div>
+  <div class="card"><h2>Sleep hours</h2><div id="c3"></div></div>
+  <div class="card"><h2>Calendar</h2><div class="mu" style="margin-bottom:6px"><span style="color:var(--ok)">■</span> workout &nbsp;<span style="color:#e9a23b">■</span> logged, no workout</div><div class="grid" id="cal"></div></div>
+</section>
+</div>
+<nav><button id="n0" class="on">Home</button><button id="n1">Log</button><button id="n2">Progress</button></nav>
+<div id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ===== PASTE YOUR FIREBASE CONFIG HERE (replace the whole block) ===== */
+/*const FIREBASE_CONFIG={
+  apiKey:"PASTE_API_KEY",
+  authDomain:"PASTE",
+  projectId:"PASTE_PROJECT_ID",
+  storageBucket:"PASTE",
+  messagingSenderId:"PASTE",
+  appId:"PASTE"
+};*/
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCnj2TZvf7AzJqkG4qk8k5i_g0lAg1IwWo",
+  authDomain: "squard-fitness.firebaseapp.com",
+  projectId: "squard-fitness",
+  storageBucket: "squard-fitness.firebasestorage.app",
+  messagingSenderId: "854440850879",
+  appId: "1:854440850879:web:561be79bc5f322d1b61d0a"
+};
+/* ===================================================================== */
+const P=[["Rithish","#e4572e"],["Chandu","#17a2b8"],["Bunny","#f2a900"],["Akki","#7b4fd1"],["Cherry","#e0508f"]];
+const START="2026-11-10",END="2026-12-31";
+const fmt=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const days=[];for(let d=new Date(2026,10,10);fmt(d)<=END;d.setDate(d.getDate()+1))days.push(fmt(d));
+const real=fmt(new Date()),cur=real<START?START:real>END?END:real;
+const upto=days.filter(d=>d<=cur);
+const $=id=>document.getElementById(id),col=n=>P.find(p=>p[0]===n)[1];
+const esc=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let E={},who=null,pw=P[0][0],wo=null,fo=null,db=null;
+try{who=localStorage.getItem("sq_who");if(who)pw=who}catch(e){}
+const key=(n,d)=>n+"_"+d;
+const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2200)};
+$("day").textContent=real<START?"Starts 10 Nov":"Day "+(days.indexOf(cur)+1)+" of "+days.length;
+
+/* ---------- charts ---------- */
+function chart(series,{bars=false,max}={}){
+  const W=640,H=190,L=30,B=18,T=8,R=6,n=days.length;
+  const mx=max||Math.max(2,...series.flatMap(s=>s.v.filter(v=>v!=null)))*1.08;
+  const x=i=>L+(i+.5)*(W-L-R)/n,y=v=>T+(H-T-B)*(1-v/mx);
+  let g="";
+  for(let k=0;k<=4;k++){const v=mx*k/4;g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--bd)"/><text x="0" y="${y(v)+3}">${v>=1000?(v/1000).toFixed(1)+"k":Math.round(v*10)/10}</text>`}
+  [0,10,20,30,40,51].forEach(i=>g+=`<text x="${x(i)-10}" y="${H-4}">${days[i].slice(5)}</text>`);
+  series.forEach(s=>{
+    if(bars){const bw=(W-L-R)/n-1;s.v.forEach((v,i)=>{if(v)g+=`<rect x="${x(i)-bw/2}" y="${y(v)}" width="${bw}" height="${H-B-y(v)}" fill="${s.c}" rx="1.5"/>`})}
+    else{let pts=[];s.v.forEach((v,i)=>{if(v!=null)pts.push(x(i)+","+y(v))});
+      if(pts.length)g+=`<polyline fill="none" stroke="${s.c}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="${pts.join(" ")}"/>`+(pts.length<2?`<circle cx="${pts[0].split(",")[0]}" cy="${pts[0].split(",")[1]}" r="3" fill="${s.c}"/>`:"")}
+  });
+  return `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
+}
+const cum=n=>{let t=0;return days.map(d=>{if(d>cur)return null;const e=E[key(n,d)];if(e&&e.workout)t++;return t})};
+const daily=(n,f)=>days.map(d=>{const e=E[key(n,d)];return e&&e[f]?+e[f]:0});
+
+/* ---------- stats ---------- */
+function stats(n){
+  let pts=0,food=0,logged=0,st=0,sd=0,sl=0,sld=0,streak=0;
+  upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;logged++;if(e.workout)pts++;if(e.food)food++;if(+e.steps>0){st+=+e.steps;sd++}if(+e.sleep>0){sl+=+e.sleep;sld++}});
+  for(let i=upto.length-1;i>=0;i--){const e=E[key(n,upto[i])];if(e&&e.workout)streak++;else if(i===upto.length-1&&upto[i]===real)continue;else break}
+  return{pts,food,logged,streak,steps:sd?Math.round(st/sd):0,sleep:sld?(sl/sld).toFixed(1):"–",foodPct:logged?Math.round(food/logged*100):0};
+}
+
+/* ---------- render ---------- */
+function home(){
+  $("today").innerHTML=P.map(([n,c])=>`<div class="pp ${E[key(n,real)]?"in":""}"><div class="av" style="background:${c}">${n[0]}</div>${n}</div>`).join("");
+  const s=P.map(([n,c])=>({n,c,...stats(n)})).sort((a,b)=>b.pts-a.pts);
+  const mx=Math.max(1,upto.length);
+  $("lb").innerHTML=s.map((p,i)=>`<div class="lb"><span class="rk">${i+1}</span><b style="width:62px">${p.n}</b><div class="bar"><i style="width:${p.pts/mx*100}%;background:${p.c}"></i></div><span class="pt">${p.pts}</span></div>`).join("");
+  $("gch").innerHTML=chart(P.map(([n,c])=>({c,v:cum(n)})));
+  $("gleg").innerHTML=P.map(([n,c])=>`<span><i style="background:${c}"></i>${n}</span>`).join("");
+  const f=Object.values(E).filter(e=>e.remarks).sort((a,b)=>(b.date.localeCompare(a.date))||((b.ts||0)-(a.ts||0))).slice(0,8);
+  $("feed").innerHTML=f.length?f.map(e=>`<div class="fd"><b style="color:${col(e.name)}">${e.name}</b> <span class="mu">${e.date.slice(5)}</span><br>${esc(e.remarks)}</div>`).join(""):'<div class="mu">No remarks yet. Be the first!</div>';
+}
+function prog(){
+  $("pwho").innerHTML=P.map(([n])=>`<button class="chip ${n===pw?"on":""}">${n}</button>`).join("");
+  document.querySelectorAll("#pwho .chip").forEach(b=>b.onclick=()=>{pw=b.textContent;prog()});
+  const s=stats(pw),c=col(pw);
+  $("tiles").innerHTML=[[s.pts,"points"],[s.streak+" 🔥","streak"],[s.steps.toLocaleString(),"avg steps"],[s.sleep,"avg sleep hrs"],[s.foodPct+"%","home food"],[s.logged,"days logged"]].map(t=>`<div class="tile"><b>${t[0]}</b><span>${t[1]}</span></div>`).join("");
+  $("c1").innerHTML=chart([{c,v:cum(pw)}]);
+  $("c2").innerHTML=chart([{c,v:daily(pw,"steps")}],{bars:true});
+  $("c3").innerHTML=chart([{c,v:days.map(d=>{const e=E[key(pw,d)];return e&&+e.sleep>0?+e.sleep:null})}],{max:12});
+  $("cal").innerHTML=days.map(d=>{const e=E[key(pw,d)];return `<div class="c ${e?(e.workout?"g":"r"):""} ${d===real?"t":""}" title="${d}">${+d.slice(8)}</div>`}).join("");
+}
+function setYN(id,v){document.querySelectorAll("#"+id+" button").forEach(b=>b.classList.toggle("on",v!==null&&b.dataset.v===String(v)))}
+function form(){
+  document.querySelectorAll("#who .chip").forEach(b=>b.classList.toggle("on",b.textContent===who));
+  const e=who?E[key(who,$("date").value)]:null;
+  wo=e?(e.workout?1:0):null;fo=e?(e.food?1:0):null;setYN("wo",wo);setYN("fo",fo);
+  $("steps").value=e&&e.steps?e.steps:"";$("sleep").value=e&&e.sleep?e.sleep:"";$("rem").value=e?e.remarks||"":"";
+  $("del").style.display=e?"block":"none";
+}
+function all(){home();prog()}
+
+/* ---------- events ---------- */
+$("who").innerHTML=P.map(([n])=>`<button class="chip">${n}</button>`).join("");
+document.querySelectorAll("#who .chip").forEach(b=>b.onclick=()=>{who=b.textContent;pw=who;try{localStorage.setItem("sq_who",who)}catch(e){}form()});
+document.querySelectorAll("#wo button").forEach(b=>b.onclick=()=>{wo=+b.dataset.v;setYN("wo",wo)});
+document.querySelectorAll("#fo button").forEach(b=>b.onclick=()=>{fo=+b.dataset.v;setYN("fo",fo)});
+const di=$("date");di.min=START;di.max=END;di.value=cur;di.onchange=form;
+function tab(i){[0,1,2].forEach(k=>{$("p"+k).classList.toggle("on",k===i);$("n"+k).classList.toggle("on",k===i)});if(i===1)form();if(i===2)prog();window.scrollTo(0,0)}
+[0,1,2].forEach(i=>$("n"+i).onclick=()=>tab(i));
+$("save").onclick=async()=>{
+  if(!who)return toast("Choose your name first");
+  const d=di.value;if(!d||d<START||d>END)return toast("Pick a date from 10 Nov to 31 Dec");
+  if(wo===null||fo===null)return toast("Answer workout and home food");
+  if(!db)return toast("Database not connected");
+  const e={name:who,date:d,workout:!!wo,food:!!fo,steps:Math.max(0,+$("steps").value||0),sleep:Math.min(24,Math.max(0,+$("sleep").value||0)),remarks:$("rem").value.trim().slice(0,300),ts:Date.now()};
+  try{await db.collection("entries").doc(key(who,d)).set(e);toast("Saved ✓");tab(0)}catch(err){toast("Could not save. Check internet.")}
+};
+$("del").onclick=async()=>{
+  const d=di.value;if(!who||!confirm("Delete "+who+"'s entry for "+d+"?"))return;
+  try{await db.collection("entries").doc(key(who,d)).delete();toast("Deleted");form()}catch(err){toast("Could not delete")}
+};
+
+/* ---------- start ---------- */
+all();
+if(FIREBASE_CONFIG.apiKey.startsWith("PASTE")){
+  $("warn").innerHTML='<div class="warn"><b>Setup needed:</b> paste your Firebase config into index.html. Data cannot be shared until then.</div>';
+}else{
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();
+    db.collection("entries").onSnapshot(s=>{const m={};s.forEach(d=>{const v=d.data();if(v&&v.name&&v.date)m[key(v.name,v.date)]=v});E=m;all();if($("p1").classList.contains("on")&&!document.activeElement.matches("input,textarea"))form()},
+      err=>{$("warn").innerHTML='<div class="warn">Could not load data: '+esc(err.code||err.message)+'. Check Firestore rules and internet.</div>'});
+  }catch(e){$("warn").innerHTML='<div class="warn">Firebase config problem: '+esc(e.message)+'</div>'}
+}
+</script></body></html>
