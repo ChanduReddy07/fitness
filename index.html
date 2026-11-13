@@ -106,7 +106,7 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
     <div class="bar"><i id="cdp" style="width:0"></i></div><div class="mu" id="cdn"></div></div>
   <div class="card"><h2>Logged today</h2><div class="today" id="today"></div></div>
   <div class="card"><h2 id="tt">Top performer</h2><div id="top"></div></div>
-  <div class="card"><h2>Leaderboard</h2><div class="mu" style="margin:-4px 0 6px">1 point each: workout (no point for rest day) · home food · 10,000 steps · 7+ hrs sleep</div><div id="lb"></div></div>
+  <div class="card"><h2>Leaderboard</h2><div class="mu" style="margin:-4px 0 6px">1 point each: workout (or your 1st rest day of the week) · home food · 10,000 steps · 7+ hrs sleep</div><div id="lb"></div></div>
   <div class="card"><h2>Everyone together</h2><div id="gch"></div><div class="leg" id="gleg"></div></div>
   <div class="card"><h2>Latest remarks</h2><div id="feed"></div></div>
 </section>
@@ -128,7 +128,7 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
 
 <section class="pg" id="p2">
   <div class="chips" id="pwho" style="margin-bottom:12px"></div>
-  <div class="card"><h2>🔥 Streaks</h2><div class="mu" style="margin:-4px 0 8px">Streak = points collected, so a missed day never resets it. Each week (Mon–Sun) adds up to 7. Workout: 6–7 workout days + 1 rest-day point; extra rest days add no point but do not break it.</div><div class="tiles" id="streaks" style="grid-template-columns:repeat(4,1fr);margin:0"></div></div>
+  <div class="card"><h2 id="sth">🔥 Streaks</h2><div class="mu" style="margin:-4px 0 8px">Streak = points collected (all four add up to your total points), so a missed day never resets it. Each week (Mon–Sun) adds up to 7. Workout: 6–7 workout days + 1 rest-day point; extra rest days add no point but do not break it.</div><div class="tiles" id="streaks" style="grid-template-columns:repeat(4,1fr);margin:0"></div></div>
   <div class="tiles" id="tiles"></div>
   <div class="card"><h2>🏅 Medal board</h2><div class="mu" style="margin:-4px 0 4px">👑 top performer days · 🚶 most steps days · 😴 most sleep days. A day's medals are given once all 5 have logged, or when the day ends.</div><div id="medals"></div></div>
   <div class="card"><h2>Points so far</h2><div id="c1"></div></div>
@@ -165,7 +165,9 @@ let E={},who=null,pw=P[0][0],wo=null,fo=null,db=null;
 try{who=localStorage.getItem("sq_who");if(who)pw=who}catch(e){}
 const key=(n,d)=>n+"_"+d;
 const act=e=>e?(e.act||(e.workout?"gym":"none")):"none";
-const ptOf=e=>e?((act(e)==="gym"?1:0)+(e.food?1:0)+(+e.steps>=10000?1:0)+(+e.sleep>=7?1:0)):0;
+const monOf=d=>{const t=new Date(d+"T00:00:00");t.setDate(t.getDate()-(t.getDay()+6)%7);return fmt(t)};
+const firstRest=(n,d)=>{const m=monOf(d);for(const x of days){if(x>=d)break;if(x>=m){const q=E[key(n,x)];if(q&&act(q)==="rest")return false}}return true};
+const ptOf=(e,n,d)=>e?((act(e)==="gym"?1:(act(e)==="rest"&&firstRest(n,d)?1:0))+(e.food?1:0)+(+e.steps>=10000?1:0)+(+e.sleep>=7?1:0)):0;
 const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2200)};
 $("day").textContent=real<START?"Starts 10 Nov":"Day "+(days.indexOf(cur)+1)+" of "+days.length;
 
@@ -184,13 +186,13 @@ function chart(series,{bars=false,max}={}){
   });
   return `<svg viewBox="0 0 ${W} ${H}">${g}</svg>`;
 }
-const cum=n=>{let t=0;return days.map(d=>{if(d>cur)return null;const e=E[key(n,d)];if(e)t+=ptOf(e);return t})};
+const cum=n=>{let t=0;return days.map(d=>{if(d>cur)return null;const e=E[key(n,d)];if(e)t+=ptOf(e,n,d);return t})};
 const daily=(n,f)=>days.map(d=>{const e=E[key(n,d)];return e&&e[f]?+e[f]:0});
 
 /* ---------- stats ---------- */
 function stats(n){
   let pts=0,food=0,logged=0,st=0,sd=0,sl=0,sld=0;
-  upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;logged++;pts+=ptOf(e);if(e.food)food++;if(+e.steps>0){st+=+e.steps;sd++}if(+e.sleep>0){sl+=+e.sleep;sld++}});
+  upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;logged++;pts+=ptOf(e,n,d);if(e.food)food++;if(+e.steps>0){st+=+e.steps;sd++}if(+e.sleep>0){sl+=+e.sleep;sld++}});
   const mon=d=>{const t=new Date(d+"T00:00:00");t.setDate(t.getDate()-(t.getDay()+6)%7);return fmt(t)};
   const cw=mon(cur),W={},z0=()=>({g:0,r:0,f:0,s:0,z:0});
   upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;const k=mon(d),w=W[k]||(W[k]=z0()),a=act(e);
@@ -198,7 +200,7 @@ function stats(n){
   let streak=0,foodS=0,walkS=0,sleepS=0;
   Object.values(W).forEach(w=>{streak+=w.g+Math.min(1,w.r);foodS+=w.f;walkS+=w.s;sleepS+=w.z});
   const c0=W[cw]||z0(),wk=[c0.g+Math.min(1,c0.r),c0.f,c0.s,c0.z];
-  const perfect=upto.filter(d=>ptOf(E[key(n,d)])===4).length;
+  const perfect=upto.filter(d=>ptOf(E[key(n,d)],n,d)===4).length;
   return{pts,food,logged,streak,foodS,walkS,sleepS,wk,perfect,steps:sd?Math.round(st/sd):0,sleep:sld?(sl/sld).toFixed(1):"–",foodPct:logged?Math.round(food/logged*100):0};
 }
 
@@ -206,7 +208,7 @@ function stats(n){
 function showTop(){
   let d=cur;for(let i=upto.length-1;i>=0;i--){if(P.some(([n])=>E[key(n,upto[i])])){d=upto[i];break}}
   $("tt").textContent="Top performer · "+(d===real?"today":d.slice(8)+"/"+d.slice(5,7));
-  const r=P.map(([n,c])=>{const e=E[key(n,d)];return{n,c,e,pt:ptOf(e),st:e?+e.steps||0:0,sl:e?+e.sleep||0:0}}).filter(x=>x.e).sort((a,b)=>b.pt-a.pt||b.st-a.st||b.sl-a.sl);
+  const r=P.map(([n,c])=>{const e=E[key(n,d)];return{n,c,e,pt:ptOf(e,n,d),st:e?+e.steps||0:0,sl:e?+e.sleep||0:0}}).filter(x=>x.e).sort((a,b)=>b.pt-a.pt||b.st-a.st||b.sl-a.sl);
   if(!r.length){$("top").innerHTML='<div class="mu">Nobody has logged yet. Be the first to take the crown!</div>';return}
   const ch=r[0];
   const best=(f,ic,fm,dl)=>{const m=Math.max(...r.map(x=>x[f]));if(m<=0)return"";return `<div class="bd" style="animation-delay:${dl}ms"><span>${ic}</span><b>${r.filter(x=>x[f]===m).map(x=>x.n).join(" & ")}</b><i>${fm(m)}</i></div>`};
@@ -233,7 +235,7 @@ function badges(){
   days.filter(d=>d<=cur).forEach(d=>{
     const r=P.map(([n])=>({n,e:E[key(n,d)]})).filter(x=>x.e);
     if(!r.length||(r.length<P.length&&d>=real))return;
-    const v=r.map(x=>({n:x.n,pt:ptOf(x.e),st:+x.e.steps||0,sl:+x.e.sleep||0}));
+    const v=r.map(x=>({n:x.n,pt:ptOf(x.e,x.n,d),st:+x.e.steps||0,sl:+x.e.sleep||0}));
     const b=v.slice().sort((a,c)=>c.pt-a.pt||c.st-a.st||c.sl-a.sl)[0];
     v.filter(x=>x.pt===b.pt&&x.st===b.st&&x.sl===b.sl).forEach(x=>B[x.n].top++);
     const ms=Math.max(...v.map(x=>x.st));if(ms>0)v.filter(x=>x.st===ms).forEach(x=>B[x.n].st++);
@@ -247,7 +249,7 @@ function medals(B){
 }
 function preview(){
   const st=+$("steps").value||0,sl=+$("sleep").value||0;
-  const it=[["💪 Workout",wo==="gym"],["🍱 Home food",fo===1],["🚶 10k steps",st>=10000],["😴 7h sleep",sl>=7]];
+  const it=[["💪 "+(wo==="rest"?"Rest day (1st of week)":"Workout"),wo==="gym"||(wo==="rest"&&firstRest(who,$("date").value))],["🍱 Home food",fo===1],["🚶 10k steps",st>=10000],["😴 7h sleep",sl>=7]];
   $("prev").innerHTML=`<b>⭐ ${it.filter(x=>x[1]).length}/4 points for this day</b><div>${it.map(x=>`<span class="${x[1]?"ok":""}">${x[1]?"✓ ":""}${x[0]}</span>`).join("")}</div>`;
 }
 function burst(){const em=["🎉","💪","⭐","🔥","✨"];for(let i=0;i<16;i++){const s=document.createElement("span");s.className="fx";s.textContent=em[i%5];s.style.setProperty("--x",(Math.random()*240-120)+"px");s.style.setProperty("--y",-(120+Math.random()*180)+"px");s.style.animationDelay=(Math.random()*.15)+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),1500)}}
@@ -257,6 +259,7 @@ function prog(){
   const s=stats(pw),c=col(pw);
   const B=badges(),mb=B[pw];
   $("tiles").innerHTML=[[s.pts,"points"],[s.steps,"avg steps"],[s.sleep,"avg sleep hrs"],[s.foodPct,"home food","%"],[s.logged,"days logged"],[s.perfect,"perfect days","⭐"],[mb.top,"top performer","👑"],[mb.st,"most steps","🚶"],[mb.sl,"most sleep","😴"]].map((t,j)=>`<div class="tile" style="animation-delay:${j*60}ms"><b>${isNaN(+t[0])?t[0]:`<em data-c="${t[0]}">0</em>`}${t[2]||""}</b><span>${t[1]}</span></div>`).join("");
+  $("sth").textContent="🔥 Streaks · "+(s.streak+s.foodS+s.walkS+s.sleepS)+" pts total";
   $("streaks").innerHTML=[[s.streak,"workout","💪",s.wk[0]],[s.foodS,"home food","🍱",s.wk[1]],[s.walkS,"walking 10k","🚶",s.wk[2]],[s.sleepS,"sleep 7h+","😴",s.wk[3]]].map((t,j)=>`<div class="tile" style="animation-delay:${j*70}ms"><b><em data-c="${t[0]}">0</em></b><span>${t[2]} ${t[1]}</span><span style="display:block;margin-top:3px;color:var(--ok);font-weight:600">this week ${t[3]}/7</span></div>`).join("");
   medals(B);["streaks","tiles","medals","c1","c2","c3","cal"].forEach(id=>rearm(rc(id)));
   $("c1").innerHTML=chart([{c,v:cum(pw)}]);
@@ -267,7 +270,7 @@ function prog(){
     let h=`<div style="font:700 18px var(--hd);margin:12px 0 6px">${t}</div><div class="grid">`+["M","T","W","T","F","S","S"].map(x=>`<div class="mu" style="text-align:center;font-size:11px">${x}</div>`).join("")+"<div></div>".repeat(off);
     for(let k=1;k<=len;k++){const d=fmt(new Date(2026,m,k));
       if(d<START||d>END){h+=`<div class="c" style="background:none;opacity:.3">${k}</div>`;continue}
-      const e=E[key(pw,d)],q=ptOf(e);
+      const e=E[key(pw,d)],q=ptOf(e,pw,d);
       h+=`<div class="c ${e&&!q?"r":""} ${d===real?"t":""}" style="${q?"background:rgba(31,157,85,"+(.3+.7*q/4)+");color:#fff":""}" title="${d}: ${q} pts">${k}</div>`}
     return h+"</div>"}).join("");
 }
