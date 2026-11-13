@@ -128,6 +128,7 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
 
 <section class="pg" id="p2">
   <div class="chips" id="pwho" style="margin-bottom:12px"></div>
+  <div class="card"><h2>🔥 Streaks</h2><div class="mu" style="margin:-4px 0 8px">Streak = points collected, so a missed day never resets it. Each week (Mon–Sun) adds up to 7. Workout: 6–7 workout days + 1 rest-day point; extra rest days add no point but do not break it.</div><div class="tiles" id="streaks" style="grid-template-columns:repeat(4,1fr);margin:0"></div></div>
   <div class="tiles" id="tiles"></div>
   <div class="card"><h2>🏅 Medal board</h2><div class="mu" style="margin:-4px 0 4px">👑 top performer days · 🚶 most steps days · 😴 most sleep days. A day's medals are given once all 5 have logged, or when the day ends.</div><div id="medals"></div></div>
   <div class="card"><h2>Points so far</h2><div id="c1"></div></div>
@@ -188,10 +189,17 @@ const daily=(n,f)=>days.map(d=>{const e=E[key(n,d)];return e&&e[f]?+e[f]:0});
 
 /* ---------- stats ---------- */
 function stats(n){
-  let pts=0,food=0,logged=0,st=0,sd=0,sl=0,sld=0,streak=0;
+  let pts=0,food=0,logged=0,st=0,sd=0,sl=0,sld=0;
   upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;logged++;pts+=ptOf(e);if(e.food)food++;if(+e.steps>0){st+=+e.steps;sd++}if(+e.sleep>0){sl+=+e.sleep;sld++}});
-  for(let i=upto.length-1;i>=0;i--){const e=E[key(n,upto[i])];if(e&&act(e)==="gym")streak++;else if(e&&act(e)==="rest")continue;else if(i===upto.length-1&&upto[i]===real)continue;else break}
-  return{pts,food,logged,streak,steps:sd?Math.round(st/sd):0,sleep:sld?(sl/sld).toFixed(1):"–",foodPct:logged?Math.round(food/logged*100):0};
+  const mon=d=>{const t=new Date(d+"T00:00:00");t.setDate(t.getDate()-(t.getDay()+6)%7);return fmt(t)};
+  const cw=mon(cur),W={},z0=()=>({g:0,r:0,f:0,s:0,z:0});
+  upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;const k=mon(d),w=W[k]||(W[k]=z0()),a=act(e);
+    if(a==="gym")w.g++;else if(a==="rest")w.r++;if(e.food)w.f++;if(+e.steps>=10000)w.s++;if(+e.sleep>=7)w.z++});
+  let streak=0,foodS=0,walkS=0,sleepS=0;
+  Object.values(W).forEach(w=>{streak+=w.g+Math.min(1,w.r);foodS+=w.f;walkS+=w.s;sleepS+=w.z});
+  const c0=W[cw]||z0(),wk=[c0.g+Math.min(1,c0.r),c0.f,c0.s,c0.z];
+  const perfect=upto.filter(d=>ptOf(E[key(n,d)])===4).length;
+  return{pts,food,logged,streak,foodS,walkS,sleepS,wk,perfect,steps:sd?Math.round(st/sd):0,sleep:sld?(sl/sld).toFixed(1):"–",foodPct:logged?Math.round(food/logged*100):0};
 }
 
 /* ---------- render ---------- */
@@ -248,8 +256,9 @@ function prog(){
   document.querySelectorAll("#pwho .chip").forEach(b=>b.onclick=()=>{pw=b.textContent;prog()});
   const s=stats(pw),c=col(pw);
   const B=badges(),mb=B[pw];
-  $("tiles").innerHTML=[[s.pts,"points"],[s.streak,"workout streak","🔥"],[s.steps,"avg steps"],[s.sleep,"avg sleep hrs"],[s.foodPct,"home food","%"],[s.logged,"days logged"],[mb.top,"top performer","👑"],[mb.st,"most steps","🚶"],[mb.sl,"most sleep","😴"]].map((t,j)=>`<div class="tile" style="animation-delay:${j*60}ms"><b>${isNaN(+t[0])?t[0]:`<em data-c="${t[0]}">0</em>`}${t[2]||""}</b><span>${t[1]}</span></div>`).join("");
-  medals(B);["tiles","medals","c1","c2","c3","cal"].forEach(id=>rearm(rc(id)));
+  $("tiles").innerHTML=[[s.pts,"points"],[s.steps,"avg steps"],[s.sleep,"avg sleep hrs"],[s.foodPct,"home food","%"],[s.logged,"days logged"],[s.perfect,"perfect days","⭐"],[mb.top,"top performer","👑"],[mb.st,"most steps","🚶"],[mb.sl,"most sleep","😴"]].map((t,j)=>`<div class="tile" style="animation-delay:${j*60}ms"><b>${isNaN(+t[0])?t[0]:`<em data-c="${t[0]}">0</em>`}${t[2]||""}</b><span>${t[1]}</span></div>`).join("");
+  $("streaks").innerHTML=[[s.streak,"workout","💪",s.wk[0]],[s.foodS,"home food","🍱",s.wk[1]],[s.walkS,"walking 10k","🚶",s.wk[2]],[s.sleepS,"sleep 7h+","😴",s.wk[3]]].map((t,j)=>`<div class="tile" style="animation-delay:${j*70}ms"><b><em data-c="${t[0]}">0</em></b><span>${t[2]} ${t[1]}</span><span style="display:block;margin-top:3px;color:var(--ok);font-weight:600">this week ${t[3]}/7</span></div>`).join("");
+  medals(B);["streaks","tiles","medals","c1","c2","c3","cal"].forEach(id=>rearm(rc(id)));
   $("c1").innerHTML=chart([{c,v:cum(pw)}]);
   $("c2").innerHTML=chart([{c,v:daily(pw,"steps")}],{bars:true});
   $("c3").innerHTML=chart([{c,v:days.map(d=>{const e=E[key(pw,d)];return e&&+e.sleep>0?+e.sleep:null})}],{max:12});
