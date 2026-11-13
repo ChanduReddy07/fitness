@@ -248,7 +248,7 @@ function prog(){
   document.querySelectorAll("#pwho .chip").forEach(b=>b.onclick=()=>{pw=b.textContent;prog()});
   const s=stats(pw),c=col(pw);
   const B=badges(),mb=B[pw];
-  $("tiles").innerHTML=[[s.pts,"points"],[s.streak,"streak","🔥"],[s.steps,"avg steps"],[s.sleep,"avg sleep hrs"],[s.foodPct,"home food","%"],[s.logged,"days logged"],[mb.top,"top performer","👑"],[mb.st,"most steps","🚶"],[mb.sl,"most sleep","😴"]].map((t,j)=>`<div class="tile" style="animation-delay:${j*60}ms"><b>${isNaN(+t[0])?t[0]:`<em data-c="${t[0]}">0</em>`}${t[2]||""}</b><span>${t[1]}</span></div>`).join("");
+  $("tiles").innerHTML=[[s.pts,"points"],[s.streak,"workout streak","🔥"],[s.steps,"avg steps"],[s.sleep,"avg sleep hrs"],[s.foodPct,"home food","%"],[s.logged,"days logged"],[mb.top,"top performer","👑"],[mb.st,"most steps","🚶"],[mb.sl,"most sleep","😴"]].map((t,j)=>`<div class="tile" style="animation-delay:${j*60}ms"><b>${isNaN(+t[0])?t[0]:`<em data-c="${t[0]}">0</em>`}${t[2]||""}</b><span>${t[1]}</span></div>`).join("");
   medals(B);["tiles","medals","c1","c2","c3","cal"].forEach(id=>rearm(rc(id)));
   $("c1").innerHTML=chart([{c,v:cum(pw)}]);
   $("c2").innerHTML=chart([{c,v:daily(pw,"steps")}],{bars:true});
