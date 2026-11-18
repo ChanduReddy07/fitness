@@ -93,6 +93,19 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
 #cds{animation:pulse 1s ease-in-out infinite}
 #cdp{animation:none;transition:width .6s;background:var(--ink)}
 .pfr{display:flex;align-items:center;gap:12px;margin-top:12px}.av2{background-size:cover}
+.mseg{display:flex;background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:3px;gap:3px}
+.mseg button{flex:1;border:0;background:none;color:var(--mu);font:700 15px var(--hd);padding:8px;border-radius:9px;cursor:pointer;transition:all .2s}
+.mseg button.on{background:var(--ink);color:var(--bg)}
+.gwrap{position:relative;touch-action:pan-y}.gtip{position:absolute;top:4px;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:10px;padding:8px 10px;font-size:12px;opacity:0;transition:opacity .15s;width:150px;z-index:3}
+.gtip div{display:flex;align-items:center;gap:6px;margin-top:3px}.gtip span{margin-left:auto;font-weight:700}.gtip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.leg span{cursor:pointer;padding:4px 10px;border-radius:999px;border:1px solid var(--bd);user-select:none;transition:opacity .2s}.leg span.off{opacity:.35;text-decoration:line-through}
+.dnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.dnav b{font:700 18px var(--hd)}
+.dnav button{width:40px;height:36px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font-size:20px;cursor:pointer}.dnav button:disabled{opacity:.3}
+.dr{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--bd);animation:slideIn .4s both}
+.dr .ic{font-size:15px;letter-spacing:1px;white-space:nowrap}
+.wt td,.wt th{text-align:center}.wt th:first-child,.wt td:first-child{text-align:left}.wt td.cw,.wt th.cw{background:var(--bg)}.wt td.t{font:700 17px var(--hd)}
+.nd{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:600;padding:10px 14px}.nd.ok{color:var(--ok)}
+.nd button{border:0;background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font:700 15px var(--hd);cursor:pointer}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
 #toast.on{opacity:1}
 .warn{background:#fff3cd;color:#664d03;padding:12px;border-radius:12px;margin-bottom:12px;font-size:14px}
@@ -104,10 +117,18 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
   <div class="card cd"><div class="cdr"><span id="cdt">Challenge ends in</span>
     <div class="cdb"><div><b id="cd_d">0</b><span>days</span></div><div><b id="cd_h">00</b><span>hrs</span></div><div><b id="cd_m">00</b><span>min</span></div><div id="cds"><b id="cd_s">00</b><span>sec</span></div></div></div>
     <div class="bar"><i id="cdp" style="width:0"></i></div><div class="mu" id="cdn"></div></div>
+  <div id="nudge"></div>
   <div class="card"><h2>Logged today</h2><div class="today" id="today"></div></div>
   <div class="card"><h2 id="tt">Top performer</h2><div id="top"></div></div>
-  <div class="card"><h2>Leaderboard</h2><div class="mu" style="margin:-4px 0 6px">1 point each: workout (or your 1st rest day of the week) · home food · 10,000 steps · 7+ hrs sleep</div><div id="lb"></div></div>
-  <div class="card"><h2>Everyone together</h2><div id="gch"></div><div class="leg" id="gleg"></div></div>
+  <div class="card"><h2>Leaderboard</h2><div class="mu" style="margin:-4px 0 6px">1 point each: workout (or a rest day, up to 2 a week) · home food · 10,000 steps · 7+ hrs sleep</div><div id="lb"></div></div>
+  <div class="card"><h2>Overall standings</h2>
+    <div class="mseg" id="gmode"><button data-m="total" class="on">Total</button><button data-m="day">Per day</button><button data-m="rank">Rank</button></div>
+    <div class="mu" id="gnote" style="margin:8px 0 4px"></div>
+    <div class="gwrap" id="gwrap"><div id="gch"></div><div id="gtip" class="gtip"></div></div>
+    <div class="leg" id="gleg"></div><div class="mu" style="margin-top:6px">Tap or drag on the graph to see any day. Tap a name to hide or show it.</div></div>
+  <div class="card"><h2>Day-by-day scoreboard</h2>
+    <div class="dnav"><button id="dprev">‹</button><b id="dlab"></b><button id="dnext">›</button></div><div id="dsb"></div></div>
+  <div class="card"><h2>Weekly standings</h2><div class="mu" style="margin:-4px 0 8px">Points per week (Mon–Sun). 👑 = week leader</div><div class="sc"><table id="wtab"></table></div></div>
   <div class="card"><h2>Latest remarks</h2><div id="feed"></div></div>
 </section>
 
@@ -115,7 +136,7 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
   <div class="card">
     <h2>Log your day</h2>
     <label>Who are you?</label><div class="chips" id="who"></div>
-    <label>Date</label><input type="date" id="date">
+    <label>Date</label><input type="date" id="date"><div class="chips" style="margin-top:8px" id="dq"><button class="chip" data-o="0">Today</button><button class="chip" data-o="1">Yesterday</button></div>
     <label>Workout today?</label><div class="yn" id="wo"><button class="y" data-v="gym">Workout</button><button class="r" data-v="rest">Rest day (0 pts)</button></div>
     <label>Home food only?</label><div class="yn" id="fo"><button class="y" data-v="1">Yes</button><button class="n" data-v="0">No</button></div>
     <div class="two"><div><label>Steps (10,000 = 1 point)</label><input type="number" id="steps" inputmode="numeric" min="0" placeholder="8000"></div>
@@ -128,7 +149,7 @@ input,textarea{width:100%;padding:12px;border:1.5px solid var(--bd);border-radiu
 
 <section class="pg" id="p2">
   <div class="chips" id="pwho" style="margin-bottom:12px"></div>
-  <div class="card"><h2 id="sth">🔥 Streaks</h2><div class="mu" style="margin:-4px 0 8px">Streak = points collected (all four add up to your total points), so a missed day never resets it. Each week (Mon–Sun) adds up to 7. Workout: 6–7 workout days + 1 rest-day point; extra rest days add no point but do not break it.</div><div class="tiles" id="streaks" style="grid-template-columns:repeat(4,1fr);margin:0"></div></div>
+  <div class="card"><h2 id="sth">🔥 Streaks</h2><div class="mu" style="margin:-4px 0 8px">Streak = points collected (all four add up to your total points), so a missed day never resets it. Each week (Mon–Sun) adds up to 7. Workout: 5–7 workout days + up to 2 rest-day points; extra rest days add no point but do not break it.</div><div class="tiles" id="streaks" style="grid-template-columns:repeat(4,1fr);margin:0"></div></div>
   <div class="tiles" id="tiles"></div>
   <div class="card"><h2>🏅 Medal board</h2><div class="mu" style="margin:-4px 0 4px">👑 top performer days · 🚶 most steps days · 😴 most sleep days. A day's medals are given once all 5 have logged, or when the day ends.</div><div id="medals"></div></div>
   <div class="card"><h2>Points so far</h2><div id="c1"></div></div>
@@ -166,8 +187,8 @@ try{who=localStorage.getItem("sq_who");if(who)pw=who}catch(e){}
 const key=(n,d)=>n+"_"+d;
 const act=e=>e?(e.act||(e.workout?"gym":"none")):"none";
 const monOf=d=>{const t=new Date(d+"T00:00:00");t.setDate(t.getDate()-(t.getDay()+6)%7);return fmt(t)};
-const firstRest=(n,d)=>{const m=monOf(d);for(const x of days){if(x>=d)break;if(x>=m){const q=E[key(n,x)];if(q&&act(q)==="rest")return false}}return true};
-const ptOf=(e,n,d)=>e?((act(e)==="gym"?1:(act(e)==="rest"&&firstRest(n,d)?1:0))+(e.food?1:0)+(+e.steps>=10000?1:0)+(+e.sleep>=7?1:0)):0;
+const restPt=(n,d)=>{const m=monOf(d);let c=0;for(const x of days){if(x>=d)break;if(x>=m){const q=E[key(n,x)];if(q&&act(q)==="rest")c++}}return c<2};
+const ptOf=(e,n,d)=>e?((act(e)==="gym"?1:(act(e)==="rest"&&restPt(n,d)?1:0))+(e.food?1:0)+(+e.steps>=10000?1:0)+(+e.sleep>=7?1:0)):0;
 const toast=t=>{const e=$("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2200)};
 $("day").textContent=real<START?"Starts 10 Nov":"Day "+(days.indexOf(cur)+1)+" of "+days.length;
 
@@ -198,8 +219,8 @@ function stats(n){
   upto.forEach(d=>{const e=E[key(n,d)];if(!e)return;const k=mon(d),w=W[k]||(W[k]=z0()),a=act(e);
     if(a==="gym")w.g++;else if(a==="rest")w.r++;if(e.food)w.f++;if(+e.steps>=10000)w.s++;if(+e.sleep>=7)w.z++});
   let streak=0,foodS=0,walkS=0,sleepS=0;
-  Object.values(W).forEach(w=>{streak+=w.g+Math.min(1,w.r);foodS+=w.f;walkS+=w.s;sleepS+=w.z});
-  const c0=W[cw]||z0(),wk=[c0.g+Math.min(1,c0.r),c0.f,c0.s,c0.z];
+  Object.values(W).forEach(w=>{streak+=w.g+Math.min(2,w.r);foodS+=w.f;walkS+=w.s;sleepS+=w.z});
+  const c0=W[cw]||z0(),wk=[c0.g+Math.min(2,c0.r),c0.f,c0.s,c0.z];
   const perfect=upto.filter(d=>ptOf(E[key(n,d)],n,d)===4).length;
   return{pts,food,logged,streak,foodS,walkS,sleepS,wk,perfect,steps:sd?Math.round(st/sd):0,sleep:sld?(sl/sld).toFixed(1):"–",foodPct:logged?Math.round(food/logged*100):0};
 }
@@ -214,14 +235,90 @@ function showTop(){
   const best=(f,ic,fm,dl)=>{const m=Math.max(...r.map(x=>x[f]));if(m<=0)return"";return `<div class="bd" style="animation-delay:${dl}ms"><span>${ic}</span><b>${r.filter(x=>x[f]===m).map(x=>x.n).join(" & ")}</b><i>${fm(m)}</i></div>`};
   $("top").innerHTML=`<div class="champ" style="border-left:6px solid ${ch.c}"><div class="crown">👑</div><div><div class="cn">${ch.n}</div><div class="cs"><span data-c="${ch.pt}">0</span> pts · <span data-c="${ch.st}">0</span> steps · ${ch.sl}h sleep</div></div></div><div class="bds">${best("st","🚶",v=>v.toLocaleString()+" steps",150)}${best("sl","😴",v=>v+" hrs",300)}${best("pt","⭐",v=>v+" pts",450)}</div>`;
 }
+/* ---------- overall standings ---------- */
+let gmode="total",hid=new Set(),dsel=null,dman=false;
+const MN=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const dl=d=>+d.slice(8)+" "+MN[+d.slice(5,7)];
+const pd=(n,d)=>ptOf(E[key(n,d)],n,d);
+function series(mode,xd){
+  const tot={};P.forEach(([n])=>{let t=0;tot[n]=xd.map(d=>{if(d>cur)return null;t+=pd(n,d);return t})});
+  if(mode==="total")return P.map(([n,c])=>({n,c,v:tot[n]}));
+  if(mode==="day")return P.map(([n,c])=>({n,c,v:xd.map(d=>d>cur?null:pd(n,d))}));
+  const rk={};P.forEach(([n])=>rk[n]=[]);
+  xd.forEach((d,i)=>{P.forEach(([n])=>{if(d>cur){rk[n].push(null);return}const t=tot[n][i];rk[n].push(1+P.filter(([m])=>tot[m][i]>t).length)})});
+  return P.map(([n,c])=>({n,c,v:rk[n]}));
+}
+function gdraw(){
+  const xd=days.slice(0,Math.max(2,upto.length)),n=xd.length,all=series(gmode,xd),S=all.filter(s=>!hid.has(s.n));
+  const W=640,H=250,L=32,B=22,T=10,R=50,step=(W-L-R)/(n-1),x=i=>L+i*step;
+  const vals=S.flatMap(s=>s.v.filter(v=>v!=null));
+  const hi=gmode==="day"?4:gmode==="rank"?5:Math.max(4,...vals)*1.1;
+  const y=v=>gmode==="rank"?T+(H-T-B)*((v-1)/4):T+(H-T-B)*(1-v/hi);
+  const ticks=gmode==="rank"?[1,2,3,4,5]:[0,1,2,3,4].map(k=>hi*k/4);
+  let g="";
+  ticks.forEach(v=>{const yy=y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${yy}" y2="${yy}" stroke="var(--bd)"/><text x="${L-5}" y="${yy+3}" text-anchor="end">${gmode==="rank"?"#"+v:Math.round(v)}</text>`});
+  const k=Math.ceil(n/7);xd.forEach((d,i)=>{if(i%k===0||i===n-1&&n<9)g+=`<text x="${x(i)}" y="${H-5}" text-anchor="middle">${dl(d)}</text>`});
+  const ends=[];
+  S.forEach((s,si)=>{
+    const pts=[];s.v.forEach((v,i)=>{if(v!=null)pts.push([x(i),y(v),v])});
+    if(!pts.length)return;
+    g+=`<polyline class="ln" pathLength="1" style="animation-delay:${si*120}ms" fill="none" stroke="${s.c}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(p=>p[0]+","+p[1]).join(" ")}"/>`;
+    pts.forEach((p,j)=>{if(gmode!=="total"||j===pts.length-1)g+=`<circle class="dt" cx="${p[0]}" cy="${p[1]}" r="${j===pts.length-1?4.2:3}" fill="${s.c}"/>`});
+    const l=pts[pts.length-1];ends.push({y:l[1],c:s.c,t:s.n.slice(0,4)+" "+(gmode==="rank"?"#"+l[2]:l[2]),x:l[0]});
+  });
+  ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y<ends[i-1].y+11)ends[i].y=ends[i-1].y+11;
+  ends.forEach(e=>g+=`<text x="${e.x+8}" y="${e.y+3}" style="fill:${e.c};font-weight:700">${esc(e.t)}</text>`);
+  g+=`<line id="gx" y1="${T}" y2="${H-B}" stroke="var(--mu)" stroke-dasharray="3" style="opacity:0"/>`;
+  $("gch").innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="touch-action:pan-y;cursor:crosshair">${g}</svg>`;
+  $("gnote").textContent=gmode==="total"?"Running total of points":gmode==="day"?"Points earned each day (max 4)":"Position each day (#1 = leader)";
+  $("gleg").innerHTML=P.map(([nm,c])=>`<span class="${hid.has(nm)?"off":""}" data-n="${nm}"><i style="background:${c}"></i>${nm}</span>`).join("");
+  document.querySelectorAll("#gleg span").forEach(b=>b.onclick=()=>{const nm=b.dataset.n;hid.has(nm)?hid.delete(nm):hid.add(nm);gdraw()});
+  const svg=$("gch").firstElementChild,tip=$("gtip"),gx=svg.querySelector("#gx");
+  const show=ev=>{const r=svg.getBoundingClientRect();let i=Math.round(((ev.clientX-r.left)/r.width*W-L)/step);i=Math.max(0,Math.min(n-1,i));if(xd[i]>cur)i=upto.length-1;
+    gx.setAttribute("x1",x(i));gx.setAttribute("x2",x(i));gx.style.opacity=1;
+    const rows=all.map(s=>({n:s.n,c:s.c,v:s.v[i],d:pd(s.n,xd[i])})).sort((a,b)=>gmode==="rank"?a.v-b.v:b.v-a.v);
+    tip.innerHTML=`<b>${dl(xd[i])}</b>`+rows.map(q=>`<div><i style="background:${q.c}"></i>${q.n}<span>${gmode==="rank"?"#"+q.v:q.v+" pts"}${gmode==="total"?` <small style="opacity:.7">(+${q.d})</small>`:""}</span></div>`).join("");
+    const px=x(i)/W*r.width;tip.style.left=(px<r.width/2?px+12:px-162)+"px";tip.style.opacity=1};
+  svg.onpointermove=show;svg.onpointerdown=show;svg.onpointerleave=ev=>{if(ev.pointerType==="mouse"){tip.style.opacity=0;gx.style.opacity=0}};
+}
+document.querySelectorAll("#gmode button").forEach(b=>b.onclick=()=>{gmode=b.dataset.m;document.querySelectorAll("#gmode button").forEach(q=>q.classList.toggle("on",q===b));gdraw()});
+
+/* ---------- day-by-day scoreboard ---------- */
+function comps(e,n,d){if(!e)return"";const a=act(e),c=[];if(a==="gym")c.push("💪");else if(a==="rest"&&restPt(n,d))c.push("🛌");if(e.food)c.push("🍱");if(+e.steps>=1e4)c.push("🚶");if(+e.sleep>=7)c.push("😴");return c.join(" ")}
+function dsb(){
+  if(!dman||dsel==null||dsel>cur){dsel=cur;if(!P.some(([n])=>E[key(n,cur)]))for(let i=upto.length-1;i>=0;i--)if(P.some(([n])=>E[key(n,upto[i])])){dsel=upto[i];break}}
+  const d=dsel,wd=new Date(d+"T00:00:00").toLocaleDateString(undefined,{weekday:"short"});
+  $("dlab").textContent=wd+" "+dl(d)+(d===real?" · today":"");
+  $("dprev").disabled=d<=START;$("dnext").disabled=d>=cur;
+  const r=P.map(([n,c])=>{const e=E[key(n,d)];return{n,c,e,pt:pd(n,d),st:e?+e.steps||0:0,sl:e?+e.sleep||0:0}}).sort((a,b)=>b.pt-a.pt||b.st-a.st||b.sl-a.sl);
+  $("dsb").innerHTML=r.map((x,i)=>`<div class="dr" style="animation-delay:${i*70}ms;${x.e?"":"opacity:.5"}"><span class="rk">${i+1}</span><div class="av2" style="${avA(x.n,x.c)}">${avT(x.n)}</div><div style="flex:1;min-width:0"><b>${x.n}</b>${x.e?`<div class="mu">${x.st.toLocaleString()} steps · ${x.sl}h sleep</div>`:'<div class="mu">not logged</div>'}</div><span class="ic">${comps(x.e,x.n,d)}</span><span class="pt">${x.pt}</span></div>`).join("");
+}
+$("dprev").onclick=()=>{const i=days.indexOf(dsel);if(i>0){dman=true;dsel=days[i-1];dsb()}};
+$("dnext").onclick=()=>{const i=days.indexOf(dsel);if(i<days.length-1&&days[i+1]<=cur){dman=true;dsel=days[i+1];dsb()}};
+
+/* ---------- weekly table ---------- */
+function wtab(){
+  const wk=[...new Set(days.map(monOf))];
+  const val=(n,k)=>days.filter(d=>monOf(d)===k&&d<=cur).reduce((a,d)=>a+pd(n,d),0);
+  const rows=P.map(([n,c])=>{const v=wk.map(k=>val(n,k));return{n,c,v,t:v.reduce((a,b)=>a+b,0)}}).sort((a,b)=>b.t-a.t);
+  const best=wk.map((k,i)=>Math.max(...rows.map(r=>r.v[i])));const cw=monOf(cur);
+  $("wtab").className="wt";
+  $("wtab").innerHTML=`<tr><th>Name</th>${wk.map((k,i)=>`<th class="${k===cw?"cw":""}" title="from ${dl(k)}">W${i+1}</th>`).join("")}<th>Total</th></tr>`+
+   rows.map(r=>`<tr><td><b style="color:${r.c}">${r.n}</b></td>${wk.map((k,i)=>`<td class="${k===cw?"cw":""}">${k>cur?"–":r.v[i]+(r.v[i]>0&&r.v[i]===best[i]?" 👑":"")}</td>`).join("")}<td class="t">${r.t}</td></tr>`).join("");
+}
+
+/* ---------- nudge ---------- */
+function nudge(){const el=$("nudge");if(!who||real<START||real>END){el.innerHTML="";return}
+  const e=E[key(who,real)];
+  el.innerHTML=e?`<div class="card nd ok">✅ ${who}, you've logged today · ${ptOf(e,who,real)}/4 pts</div>`:`<div class="card nd"><span>👋 ${who}, you haven't logged today</span><button onclick="tab(1)">Log now</button></div>`;
+}
 function home(){
   showTop();
   $("today").innerHTML=P.map(([n,c])=>`<div class="pp ${E[key(n,real)]?"in":""}"><div class="av" style="${avA(n,c)}">${avT(n)}</div>${n}</div>`).join("");
   const s=P.map(([n,c])=>({n,c,...stats(n)})).sort((a,b)=>b.pts-a.pts);
   const mx=Math.max(1,upto.length*4);
   $("lb").innerHTML=s.map((p,i)=>`<div class="lb"><span class="rk">${i+1}</span><b style="width:62px">${p.n}</b><div class="bar"><i style="width:${p.pts/mx*100}%;background:${p.c}"></i></div><span class="pt">${p.pts}</span></div>`).join("");
-  $("gch").innerHTML=chart(P.map(([n,c])=>({c,v:cum(n)})));
-  $("gleg").innerHTML=P.map(([n,c])=>`<span><i style="background:${c}"></i>${n}</span>`).join("");
+  gdraw();dsb();wtab();nudge();
   const f=Object.values(E).filter(e=>e.remarks).sort((a,b)=>(b.date.localeCompare(a.date))||((b.ts||0)-(a.ts||0))).slice(0,8);
   $("feed").innerHTML=f.length?f.map(e=>`<div class="fd"><b style="color:${col(e.name)}">${e.name}</b> <span class="mu">${e.date.slice(5)}</span><br>${esc(e.remarks)}</div>`).join(""):'<div class="mu">No remarks yet. Be the first!</div>';
 }
@@ -229,7 +326,7 @@ function countUp(root){root.querySelectorAll("[data-c]").forEach(el=>{const raw=
 const io="IntersectionObserver" in window?new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add("in");countUp(en.target);io.unobserve(en.target)}}),{threshold:.15}):null;
 function rearm(el){if(!el)return;el.setAttribute("data-rv","");el.classList.remove("in");if(io){io.unobserve(el);io.observe(el)}else{el.classList.add("in");countUp(el)}}
 const rc=id=>$(id).closest(".card")||$(id);
-function homeRearm(){["top","lb","gch","feed"].forEach(id=>rearm(rc(id)))}
+function homeRearm(){["top","lb","gch","dsb","wtab","feed"].forEach(id=>rearm(rc(id)))}
 function badges(){
   const B={};P.forEach(([n])=>B[n]={top:0,st:0,sl:0});
   days.filter(d=>d<=cur).forEach(d=>{
@@ -249,7 +346,7 @@ function medals(B){
 }
 function preview(){
   const st=+$("steps").value||0,sl=+$("sleep").value||0;
-  const it=[["💪 "+(wo==="rest"?"Rest day (1st of week)":"Workout"),wo==="gym"||(wo==="rest"&&firstRest(who,$("date").value))],["🍱 Home food",fo===1],["🚶 10k steps",st>=10000],["😴 7h sleep",sl>=7]];
+  const it=[["💪 "+(wo==="rest"?"Rest day (up to 2/week)":"Workout"),wo==="gym"||(wo==="rest"&&restPt(who,$("date").value))],["🍱 Home food",fo===1],["🚶 10k steps",st>=10000],["😴 7h sleep",sl>=7]];
   $("prev").innerHTML=`<b>⭐ ${it.filter(x=>x[1]).length}/4 points for this day</b><div>${it.map(x=>`<span class="${x[1]?"ok":""}">${x[1]?"✓ ":""}${x[0]}</span>`).join("")}</div>`;
 }
 function burst(){const em=["🎉","💪","⭐","🔥","✨"];for(let i=0;i<16;i++){const s=document.createElement("span");s.className="fx";s.textContent=em[i%5];s.style.setProperty("--x",(Math.random()*240-120)+"px");s.style.setProperty("--y",-(120+Math.random()*180)+"px");s.style.animationDelay=(Math.random()*.15)+"s";document.body.appendChild(s);setTimeout(()=>s.remove(),1500)}}
@@ -293,6 +390,7 @@ document.querySelectorAll("#wo button").forEach(b=>b.onclick=()=>{wo=b.dataset.v
 document.querySelectorAll("#fo button").forEach(b=>b.onclick=()=>{fo=+b.dataset.v;setYN("fo",fo);preview()});
 $("steps").oninput=$("sleep").oninput=preview;
 const di=$("date");di.min=START;di.max=END;di.value=cur;di.onchange=form;
+document.querySelectorAll("#dq .chip").forEach(b=>b.onclick=()=>{const t=new Date();t.setDate(t.getDate()-(+b.dataset.o));let v=fmt(t);v=v<START?START:v>END?END:v;di.value=v;form()});
 function tab(i){[0,1,2].forEach(k=>{$("p"+k).classList.toggle("on",k===i);$("n"+k).classList.toggle("on",k===i)});if(i===1)form();if(i===2)prog();if(i===0)homeRearm();window.scrollTo(0,0)}
 [0,1,2].forEach(i=>$("n"+i).onclick=()=>tab(i));
 $("save").onclick=async()=>{
